@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nielsen Heuristics Fisheye Dock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f7f8fb;
+      --ink: #152238;
+      --muted: #667085;
+      --panel: rgba(255, 255, 255, 0.88);
+      --panel-strong: #ffffff;
+      --line: rgba(21, 34, 56, 0.12);
+      --teal: #087f8c;
+      --coral: #d65d4a;
+      --gold: #c58a19;
+      --green: #3d8262;
+      --blue: #356bb3;
+      --shadow: 0 18px 50px rgba(21, 34, 56, 0.16);
+      --dock-item: clamp(58px, 8vw, 84px);
+      --dock-gap: clamp(8px, 1.3vw, 14px);
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: var(--page);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(8, 127, 140, 0.10), transparent 34%),
+        linear-gradient(225deg, rgba(214, 93, 74, 0.10), transparent 30%),
+        var(--page);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.28;
+      background-image:
+        linear-gradient(rgba(21, 34, 56, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(21, 34, 56, 0.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+    }
+
+    .page {
+      position: relative;
+      width: min(1180px, calc(100% - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: clamp(28px, 4vw, 54px) 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(20px, 4vw, 42px);
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(32px, 6vw, 70px);
+      line-height: 0.96;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .kicker {
+      margin: 0 0 12px;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .summary {
+      margin: 14px 0 0;
+      max-width: 690px;
+      color: var(--muted);
+      font-size: clamp(15px, 1.7vw, 18px);
+      line-height: 1.65;
+    }
+
+    .counter {
+      min-width: 126px;
+      text-align: right;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .counter strong {
+      display: block;
+      color: var(--coral);
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1;
+    }
+
+    main {
+      display: grid;
+      align-items: center;
+      gap: clamp(18px, 3vw, 28px);
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      gap: clamp(18px, 3vw, 30px);
+      align-items: stretch;
+    }
+
+    .workspace,
+    .detail {
+      min-width: 0;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      border-radius: 8px;
+    }
+
+    .workspace {
+      min-height: 438px;
+      padding: clamp(18px, 3vw, 30px);
+      display: grid;
+      align-content: center;
+      gap: 22px;
+      overflow: hidden;
+    }
+
+    .dock-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .dock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--dock-gap);
+      min-height: calc(var(--dock-item) * 1.62);
+      padding: 24px 14px;
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.58)),
+        linear-gradient(90deg, rgba(8, 127, 140, 0.10), rgba(197, 138, 25, 0.08), rgba(214, 93, 74, 0.10));
+      border: 1px solid rgba(21, 34, 56, 0.10);
+    }
+
+    .dock-item {
+      appearance: none;
+      position: relative;
+      width: var(--dock-item);
+      height: var(--dock-item);
+      flex: 0 0 var(--dock-item);
+      border: 1px solid rgba(21, 34, 56, 0.14);
+      border-radius: 8px;
+      background: var(--panel-strong);
+      color: var(--item-color);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(21, 34, 56, 0.10);
+      transform: translateY(var(--lift, 0)) scale(var(--scale, 1));
+      transform-origin: center bottom;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+      outline: none;
+    }
+
+    .dock-item::after {
+      content: attr(data-code);
+      position: absolute;
+      left: 50%;
+      bottom: 7px;
+      translate: -50% 0;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--ink);
+      opacity: 0.74;
+    }
+
+    .dock-item i {
+      font-size: clamp(22px, 3vw, 34px);
+      transition: transform 180ms ease;
+    }
+
+    .dock-item:is(:hover, :focus-visible, .active) {
+      --scale: 1.42;
+      --lift: -14px;
+      z-index: 4;
+      background: #ffffff;
+      border-color: color-mix(in srgb, var(--item-color), #ffffff 20%);
+      box-shadow: 0 24px 42px rgba(21, 34, 56, 0.18);
+    }
+
+    .dock-item:is(:hover, :focus-visible, .active) i {
+      transform: translateY(-4px);
+    }
+
+    .dock-item.near {
+      --scale: 1.18;
+      --lift: -7px;
+      z-index: 2;
+    }
+
+    .dock-item.active {
+      box-shadow: 0 22px 46px rgba(21, 34, 56, 0.20), inset 0 -5px 0 var(--item-color);
+    }
+
+    .dock-item:focus-visible {
+      outline: 3px solid rgba(8, 127, 140, 0.28);
+      outline-offset: 5px;
+    }
+
+    .hint-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .hint {
+      min-height: 78px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.66);
+    }
+
+    .hint b {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .hint span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .detail {
+      position: relative;
+      padding: clamp(20px, 3vw, 34px);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 18px;
+      overflow: hidden;
+    }
+
+    .detail::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 8px;
+      background: var(--active-color, var(--teal));
+    }
+
+    .detail-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--active-color, var(--teal));
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .badge i {
+      font-size: 18px;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: right;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 42px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .definition {
+      margin: 0;
+      color: #344054;
+      font-size: clamp(16px, 1.6vw, 18px);
+      line-height: 1.72;
+    }
+
+    .learning-value {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .learning-value li {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      color: #344054;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    .learning-value i {
+      margin-top: 3px;
+      color: var(--active-color, var(--teal));
+    }
+
+    .mini-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--ink);
+      min-height: 36px;
+      padding: 0 13px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .chip:hover,
+    .chip:focus-visible {
+      border-color: var(--active-color, var(--teal));
+      color: var(--active-color, var(--teal));
+      outline: none;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+
+    @media (max-width: 920px) {
+      header,
+      .stage {
+        grid-template-columns: 1fr;
+      }
+
+      .counter {
+        text-align: left;
+      }
+
+      .workspace {
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .page {
+        width: min(100% - 22px, 1180px);
+        padding-top: 22px;
+      }
+
+      .dock {
+        justify-content: flex-start;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        padding: 26px 18px;
+      }
+
+      .dock-item {
+        scroll-snap-align: center;
+      }
+
+      .hint-row {
+        grid-template-columns: 1fr;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 6px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <p class="kicker">Human Computer Interaction</p>
+        <h1>Nielsen's 10 Usability Heuristics</h1>
+        <p class="summary">A fisheye learning dock with concise labels, accurate heuristic definitions, real icons, polished overlays, and responsive interaction.</p>
+      </div>
+      <div class="counter" aria-live="polite">
+        <strong id="currentNumber">01</strong>
+        <span id="currentCode">UH#1 selected</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="stage" aria-label="Interactive heuristic dock">
+        <div class="workspace">
+          <div class="dock-label">
+            <span>Fisheye Dock</span>
+            <span>Interactive Heuristics</span>
+          </div>
+
+          <nav class="dock" id="dock" aria-label="Nielsen usability heuristics"></nav>
+
+          <div class="hint-row" aria-label="Interaction qualities">
+            <div class="hint">
+              <b>Clear content</b>
+              <span>Each overlay uses the accepted Nielsen wording and a short design takeaway.</span>
+            </div>
+            <div class="hint">
+              <b>Polished UI</b>
+              <span>Real icons, restrained color, focus rings, elevation, and readable overlays.</span>
+            </div>
+            <div class="hint">
+              <b>Responsive behavior</b>
+              <span>The dock adapts from desktop to mobile and supports mouse, touch, and keyboard.</span>
+            </div>
+          </div>
+        </div>
+
+        <article class="detail" id="detail" aria-live="polite">
+          <div class="detail-top">
+            <span class="badge" id="detailBadge"><i class="fa-solid fa-eye"></i> UH#1</span>
+            <span class="status" id="detailStatus">Selected</span>
+          </div>
+          <h2 id="detailTitle">Visibility of System Status</h2>
+          <p class="definition" id="detailDefinition"></p>
+          <ul class="learning-value" id="learningValue"></ul>
+          <div class="mini-nav" aria-label="Quick selection">
+            <button class="chip" type="button" data-jump="0">First</button>
+            <button class="chip" type="button" data-step="-1">Previous</button>
+            <button class="chip" type="button" data-step="1">Next</button>
+            <button class="chip" type="button" data-jump="9">Last</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>Jakob Nielsen's heuristic set, adapted for an HCI classroom interface.</span>
+      <span>Built for content, visual design, and frontend integration roles.</span>
+    </footer>
+  </div>
+
+  <script>
+    const heuristics = [
+      {
+        code: "UH#1",
+        icon: "fa-solid fa-eye",
+        title: "Visibility of System Status",
+        color: "#087f8c",
+        definition: "The design should always keep users informed about what is going on, through appropriate feedback within a reasonable amount of time.",
+        points: ["Show progress, loading, saved states, and confirmations.", "Make feedback immediate enough that users do not feel lost."]
+      },
+      {
+        code: "UH#2",
+        icon: "fa-solid fa-comments",
+        title: "Match Between System and the Real World",
+        color: "#d65d4a",
+        definition: "The design should speak the users' language, using familiar words, phrases, and concepts, and follow real-world conventions.",
+        points: ["Use natural language instead of internal system terms.", "Arrange information in an order users already understand."]
+      },
+      {
+        code: "UH#3",
+        icon: "fa-solid fa-rotate-left",
+        title: "User Control and Freedom",
+        color: "#356bb3",
+        definition: "Users often perform actions by mistake, so they need a clearly marked way to leave the unwanted state without a long process.",
+        points: ["Support undo, cancel, back, and exit actions.", "Let users recover without forcing them through extra steps."]
+      },
+      {
+        code: "UH#4",
+        icon: "fa-solid fa-layer-group",
+        title: "Consistency and Standards",
+        color: "#3d8262",
+        definition: "Users should not have to wonder whether different words, situations, or actions mean the same thing. Follow platform and industry conventions.",
+        points: ["Use consistent labels, icons, layouts, and interaction patterns.", "Respect conventions users have learned from other products."]
+      },
+      {
+        code: "UH#5",
+        icon: "fa-solid fa-shield-halved",
+        title: "Error Prevention",
+        color: "#c58a19",
+        definition: "Good error messages help, but careful design that prevents problems from occurring in the first place is even better.",
+        points: ["Use constraints, confirmations, sensible defaults, and validation.", "Prevent slips before users submit or commit an action."]
+      },
+      {
+        code: "UH#6",
+        icon: "fa-solid fa-list-check",
+        title: "Recognition Rather Than Recall",
+        color: "#7952b3",
+        definition: "Minimize the user's memory load by making objects, actions, and options visible. Needed information should be easy to retrieve.",
+        points: ["Keep choices visible instead of expecting memorized commands.", "Use labels, previews, menus, and contextual cues."]
+      },
+      {
+        code: "UH#7",
+        icon: "fa-solid fa-bolt",
+        title: "Flexibility and Efficiency of Use",
+        color: "#b54708",
+        definition: "Shortcuts and accelerators can speed up interaction for expert users while still allowing beginners to use the system comfortably.",
+        points: ["Offer keyboard shortcuts, saved preferences, and repeat actions.", "Support both first-time users and frequent users."]
+      },
+      {
+        code: "UH#8",
+        icon: "fa-solid fa-wand-magic-sparkles",
+        title: "Aesthetic and Minimalist Design",
+        color: "#b42365",
+        definition: "Interfaces should not contain irrelevant or rarely needed information because every extra element competes with important content.",
+        points: ["Prioritize the information users need right now.", "Reduce visual clutter while preserving useful context."]
+      },
+      {
+        code: "UH#9",
+        icon: "fa-solid fa-triangle-exclamation",
+        title: "Help Users Recognize, Diagnose, and Recover from Errors",
+        color: "#c0262d",
+        definition: "Error messages should use plain language, precisely indicate the problem, and constructively suggest a solution.",
+        points: ["Say what happened, where it happened, and how to fix it.", "Avoid blaming the user or using technical codes alone."]
+      },
+      {
+        code: "UH#10",
+        icon: "fa-solid fa-book-open",
+        title: "Help and Documentation",
+        color: "#4c6f91",
+        definition: "Even when a system can be used without documentation, it may still need searchable help focused on users' tasks.",
+        points: ["Keep help short, task-focused, and easy to search.", "Place guidance near the moment where users need it."]
+      }
+    ];
+
+    const dock = document.querySelector("#dock");
+    const detail = document.querySelector("#detail");
+    const detailBadge = document.querySelector("#detailBadge");
+    const detailStatus = document.querySelector("#detailStatus");
+    const detailTitle = document.querySelector("#detailTitle");
+    const detailDefinition = document.querySelector("#detailDefinition");
+    const learningValue = document.querySelector("#learningValue");
+    const currentNumber = document.querySelector("#currentNumber");
+    const currentCode = document.querySelector("#currentCode");
+    let selectedIndex = 0;
+
+    function renderDock() {
+      heuristics.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dock-item";
+        button.dataset.index = index;
+        button.dataset.code = item.code;
+        button.style.setProperty("--item-color", item.color);
+        button.setAttribute("aria-label", `${item.code}: ${item.title}`);
+        button.innerHTML = `<i class="${item.icon}" aria-hidden="true"></i>`;
+        button.addEventListener("mouseenter", () => preview(index, "Preview"));
+        button.addEventListener("focus", () => preview(index, "Focused"));
+        button.addEventListener("click", () => select(index));
+        button.addEventListener("keydown", handleDockKeys);
+        dock.append(button);
+      });
+
+      dock.addEventListener("mouseleave", () => {
+        setNeighborState(-1);
+        updateDetail(selectedIndex, "Selected");
+      });
+    }
+
+    function preview(index, status) {
+      setNeighborState(index);
+      updateDetail(index, status);
+    }
+
+    function select(index) {
+      selectedIndex = clamp(index);
+      updateDetail(selectedIndex, "Selected");
+      syncActiveButton();
+    }
+
+    function updateDetail(index, status) {
+      const item = heuristics[index];
+      detail.style.setProperty("--active-color", item.color);
+      detailBadge.innerHTML = `<i class="${item.icon}" aria-hidden="true"></i> ${item.code}`;
+      detailStatus.textContent = status;
+      detailTitle.textContent = item.title;
+      detailDefinition.textContent = item.definition;
+      learningValue.innerHTML = item.points.map((point) => `<li><i class="fa-solid fa-check" aria-hidden="true"></i><span>${point}</span></li>`).join("");
+      currentNumber.textContent = String(index + 1).padStart(2, "0");
+      currentCode.textContent = `${item.code} ${status.toLowerCase()}`;
+    }
+
+    function syncActiveButton() {
+      document.querySelectorAll(".dock-item").forEach((button, index) => {
+        const isActive = index === selectedIndex;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-current", isActive ? "true" : "false");
+      });
+    }
+
+    function setNeighborState(index) {
+      document.querySelectorAll(".dock-item").forEach((button, buttonIndex) => {
+        button.classList.toggle("near", index >= 0 && Math.abs(buttonIndex - index) === 1);
+      });
+    }
+
+    function handleDockKeys(event) {
+      const index = Number(event.currentTarget.dataset.index);
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        select(index);
+      }
+
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        focusDockItem(index + 1);
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        focusDockItem(index - 1);
+      }
+
+      if (event.key === "Home") {
+        event.preventDefault();
+        focusDockItem(0);
+      }
+
+      if (event.key === "End") {
+        event.preventDefault();
+        focusDockItem(heuristics.length - 1);
+      }
+    }
+
+    function focusDockItem(index) {
+      const target = document.querySelector(`.dock-item[data-index="${clamp(index)}"]`);
+      target.focus();
+    }
+
+    function clamp(index) {
+      return Math.max(0, Math.min(heuristics.length - 1, index));
+    }
+
+    document.querySelectorAll("[data-step]").forEach((button) => {
+      button.addEventListener("click", () => select(selectedIndex + Number(button.dataset.step)));
+    });
+
+    document.querySelectorAll("[data-jump]").forEach((button) => {
+      button.addEventListener("click", () => select(Number(button.dataset.jump)));
+    });
+
+    renderDock();
+    select(0);
+  </script>
+</body>
+</html>
