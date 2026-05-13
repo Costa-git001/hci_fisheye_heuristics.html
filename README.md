@@ -4,6 +4,10 @@ An interactive Human Computer Interaction webpage that presents Jakob Nielsen's 
 
 The project was created from the HCI group work brief, which asked for accurate heuristic content, improved overlay text, real icons, better visual design, smooth fisheye interactions, click support, responsiveness, and keyboard accessibility.
 
+## Open Webpage
+
+[Click here to open the HCI Fisheye Heuristics webpage](http://127.0.0.1:4173/hci_fisheye_heuristics.html)
+
 ## Live Files
 
 - `index.html` - main webpage entry point for GitHub Pages or browser preview.
@@ -54,19 +58,11 @@ cd "C:\Users\User\Documents\hci_fisheye_heuristics_repo"
 python -m http.server 4173
 ```
 
-Then visit:
-
-```text
-http://127.0.0.1:4173/index.html
-```
+Then visit: [http://127.0.0.1:4173/hci_fisheye_heuristics.html](http://127.0.0.1:4173/hci_fisheye_heuristics.html)
 
 ## Verification
 
-The webpage was checked in the browser at:
-
-```text
-http://127.0.0.1:4173/hci_fisheye_heuristics.html
-```
+The webpage was checked in the browser at [http://127.0.0.1:4173/hci_fisheye_heuristics.html](http://127.0.0.1:4173/hci_fisheye_heuristics.html).
 
 Verified behavior:
 
